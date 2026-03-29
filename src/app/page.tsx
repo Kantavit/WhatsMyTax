@@ -396,21 +396,21 @@ export default function Home() {
   const [incomeItems, setIncomeItems] = useState<IncomeItem[]>([{
     id: '1',
     name: 'เงินเดือน',
-    amount: '0',
-    withholding: '0',
+    amount: '',
+    withholding: '',
     enabled: true,
   },{
     id: '2',
     name: 'เงินปันผล',
-    amount: '0',
-    withholding: '0',
+    amount: '',
+    withholding: '',
     enabled: true,
   },
   {
     id: '3',
     name: 'ดอกเบี้ยเงินฝาก',
-    amount: '0',
-    withholding: '0',
+    amount: '',
+    withholding: '',
     enabled: true,
   },]);
   const [deductionItems, setDeductionItems] = useState<DeductionItem[]>([{
@@ -428,13 +428,13 @@ export default function Home() {
     {
       id: '3',
       name: 'ประกันสังคม',
-      amount: '0',
+      amount: '',
       enabled: true,
     },
     {
       id: '4',
       name: 'เงินบริจาค',
-      amount: '0',
+      amount: '',
       enabled: true,
     },]);
   const [result, setResult] = useState<TaxResult | null>(null);
