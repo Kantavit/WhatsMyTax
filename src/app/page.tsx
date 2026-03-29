@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 
 /* ── Thailand 2025 Progressive Tax Brackets ── */
 const TAX_BRACKETS = [
@@ -15,10 +15,19 @@ const TAX_BRACKETS = [
 ] as const;
 
 /* ── Types ── */
-interface LineItem {
+interface IncomeItem {
   id: string;
   name: string;
-  amount: string; // formatted display value
+  amount: string;
+  withholding: string; // หัก ณ ที่จ่าย per income item
+  enabled: boolean;    // toggle switch
+}
+
+interface DeductionItem {
+  id: string;
+  name: string;
+  amount: string;
+  enabled: boolean;    // toggle switch
 }
 
 interface BracketResult {
@@ -73,8 +82,6 @@ function calculateTax(
     remaining -= taxableInBracket;
   }
 
-  // If net income is 0 → tax = 0, refund = all withholding
-  // Otherwise → subtract withholding from computed tax
   let taxAfterWithholding = 0;
   let refund = 0;
 
@@ -120,38 +127,78 @@ function newId(): string {
   return `item-${++idCounter}-${Date.now()}`;
 }
 
+/** Parse a formatted number string (with commas and optional decimals) to a number */
 function parseAmount(formatted: string): number {
-  const raw = formatted.replace(/[^0-9]/g, "");
-  return raw === "" ? 0 : Number(raw);
+  const raw = formatted.replace(/[^0-9.]/g, "");
+  if (raw === "" || raw === ".") return 0;
+  const num = parseFloat(raw);
+  return isNaN(num) ? 0 : Math.round(num * 100) / 100;
 }
 
+/** Format amount input to allow commas and up to 2 decimal places */
 function formatAmountInput(value: string): string {
-  const raw = value.replace(/[^0-9]/g, "");
+  // Remove everything except digits, dots, and commas
+  let raw = value.replace(/[^0-9.]/g, "");
+
+  // Handle multiple dots — keep only the first one
+  const dotIndex = raw.indexOf(".");
+  if (dotIndex !== -1) {
+    const intPart = raw.substring(0, dotIndex);
+    let decPart = raw.substring(dotIndex + 1).replace(/\./g, "");
+    // Limit decimal to 2 places
+    decPart = decPart.substring(0, 2);
+    // Format integer part with commas
+    const formattedInt = intPart === "" ? "0" : Number(intPart).toLocaleString("en-US");
+    return `${formattedInt}.${decPart}`;
+  }
+
   if (raw === "") return "";
   return Number(raw).toLocaleString("en-US");
 }
 
-function createEmptyItem(): LineItem {
-  return { id: newId(), name: "", amount: "" };
+function createEmptyIncomeItem(): IncomeItem {
+  return { id: newId(), name: "", amount: "", withholding: "", enabled: true };
 }
 
-/* ── Reusable Item List Section Component ── */
-function ItemListSection({
+function createEmptyDeductionItem(): DeductionItem {
+  return { id: newId(), name: "", amount: "", enabled: true };
+}
+
+/* ── Toggle Switch Component ── */
+function ToggleSwitch({
+  checked,
+  onChange,
+  ariaLabel,
+}: {
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  ariaLabel: string;
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      aria-label={ariaLabel}
+      className={`toggle-switch ${checked ? "toggle-on" : "toggle-off"}`}
+      onClick={() => onChange(!checked)}
+    >
+      <span className="toggle-knob" />
+    </button>
+  );
+}
+
+/* ── Income Item List Section ── */
+function IncomeListSection({
   title,
   items,
   setItems,
   addLabel,
-  namePlaceholder,
-  amountPlaceholder,
-  sectionId,
 }: {
   title: string;
-  items: LineItem[];
-  setItems: React.Dispatch<React.SetStateAction<LineItem[]>>;
+  items: IncomeItem[];
+  setItems: React.Dispatch<React.SetStateAction<IncomeItem[]>>;
   addLabel: string;
-  namePlaceholder: string;
-  amountPlaceholder: string;
-  sectionId: string;
 }) {
   const handleNameChange = (id: string, value: string) => {
     setItems((prev) =>
@@ -167,34 +214,161 @@ function ItemListSection({
     );
   };
 
+  const handleWithholdingChange = (id: string, value: string) => {
+    setItems((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, withholding: formatAmountInput(value) } : item
+      )
+    );
+  };
+
+  const handleToggle = (id: string, checked: boolean) => {
+    setItems((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, enabled: checked } : item
+      )
+    );
+  };
+
   const handleRemove = (id: string) => {
     setItems((prev) => prev.filter((item) => item.id !== id));
   };
 
   const handleAdd = () => {
-    setItems((prev) => [...prev, createEmptyItem()]);
+    setItems((prev) => [...prev, createEmptyIncomeItem()]);
   };
 
   return (
-    <div id={sectionId}>
-      <div className="section-label">
-        <h3>{title}</h3>
+    <div id="income-section" className="space-y-6">
+      <div className="flex items-center gap-2 mb-2">
+        <span className="material-symbols-outlined text-primary">payments</span>
+        <h2 className="text-xl font-bold text-on-surface">{title}</h2>
       </div>
-      <div className="items-list">
+      <div className="items-list space-y-4">
         {items.map((item) => (
-          <div key={item.id} className="item-row">
+          <div
+            key={item.id}
+            className={`${!item.enabled ? "item-disabled" : ""}`}
+          >
+            <div className="item-row">
+              <ToggleSwitch
+                checked={item.enabled}
+                onChange={(checked) => handleToggle(item.id, checked)}
+                ariaLabel={`เปิด/ปิดรายการ ${item.name || "เงินได้"}`}
+              />
+              <input
+                type="text"
+                className="input-name"
+                placeholder="รายการเงินได้"
+                value={item.name}
+                onChange={(e) => handleNameChange(item.id, e.target.value)}
+              />
+              <input
+                type="text"
+                inputMode="decimal"
+                className="input-amount"
+                placeholder="จำนวนเงิน"
+                value={item.amount}
+                onChange={(e) => handleAmountChange(item.id, e.target.value)}
+              />
+              <input
+                type="text"
+                inputMode="decimal"
+                className="input-amount"
+                placeholder="หัก ณ ที่จ่าย"
+                value={item.withholding}
+                onChange={(e) => handleWithholdingChange(item.id, e.target.value)}
+              />
+              <button
+                className="btn-remove"
+                onClick={() => handleRemove(item.id)}
+                aria-label="ลบรายการ"
+              >
+                ×
+              </button>
+            </div>
+          </div>
+        ))}
+        <button className="btn-add" onClick={handleAdd}>
+          <span className="icon-plus">+</span> {addLabel}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ── Deduction Item List Section ── */
+function DeductionListSection({
+  title,
+  items,
+  setItems,
+  addLabel,
+}: {
+  title: string;
+  items: DeductionItem[];
+  setItems: React.Dispatch<React.SetStateAction<DeductionItem[]>>;
+  addLabel: string;
+}) {
+  const handleNameChange = (id: string, value: string) => {
+    setItems((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, name: value } : item))
+    );
+  };
+
+  const handleAmountChange = (id: string, value: string) => {
+    setItems((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, amount: formatAmountInput(value) } : item
+      )
+    );
+  };
+
+  const handleToggle = (id: string, checked: boolean) => {
+    setItems((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, enabled: checked } : item
+      )
+    );
+  };
+
+  const handleRemove = (id: string) => {
+    setItems((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const handleAdd = () => {
+    setItems((prev) => [...prev, createEmptyDeductionItem()]);
+  };
+
+  return (
+    <div id="deduction-section" className="space-y-6">
+      <div className="flex items-center gap-2 mb-2">
+        <span className="material-symbols-outlined text-primary">savings</span>
+        <h2 className="text-xl font-bold text-on-surface">{title}</h2>
+      </div>
+      <div className="items-list space-y-4">
+        {items.map((item) => (
+          <div
+            key={item.id}
+            className={`${!item.enabled ? "item-disabled" : ""}`}
+          >
+            <div className="item-row">
+            <ToggleSwitch
+              checked={item.enabled}
+              onChange={(checked) => handleToggle(item.id, checked)}
+              ariaLabel={`เปิด/ปิดรายการ ${item.name || "ค่าลดหย่อน"}`}
+            />
             <input
               type="text"
               className="input-name"
-              placeholder={namePlaceholder}
+              placeholder="รายการลดหย่อน"
               value={item.name}
               onChange={(e) => handleNameChange(item.id, e.target.value)}
             />
             <input
               type="text"
-              inputMode="numeric"
+              inputMode="decimal"
               className="input-amount"
-              placeholder={amountPlaceholder}
+              placeholder="จำนวนเงิน"
               value={item.amount}
               onChange={(e) => handleAmountChange(item.id, e.target.value)}
             />
@@ -205,6 +379,7 @@ function ItemListSection({
             >
               ×
             </button>
+            </div>
           </div>
         ))}
         <button className="btn-add" onClick={handleAdd}>
@@ -217,25 +392,56 @@ function ItemListSection({
 
 /* ── Main Page Component ── */
 export default function Home() {
-  const [incomeItems, setIncomeItems] = useState<LineItem[]>([createEmptyItem()]);
-  const [deductionItems, setDeductionItems] = useState<LineItem[]>([]);
-  const [withholdingItems, setWithholdingItems] = useState<LineItem[]>([]);
+  const [incomeItems, setIncomeItems] = useState<IncomeItem[]>([createEmptyIncomeItem()]);
+  const [deductionItems, setDeductionItems] = useState<DeductionItem[]>([]);
   const [result, setResult] = useState<TaxResult | null>(null);
   const [showResult, setShowResult] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // Handle system preference on mount and live-updates
+  useEffect(() => {
+    setMounted(true);
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    
+    // Set initial state based on what the script added or media query
+    const isSystemDark = document.documentElement.classList.contains('dark') || mediaQuery.matches;
+    setIsDarkMode(isSystemDark);
+
+    const handler = (e: MediaQueryListEvent) => setIsDarkMode(e.matches);
+    mediaQuery.addEventListener('change', handler);
+    return () => mediaQuery.removeEventListener('change', handler);
+  }, []);
+
+  // Synchronize the 'dark' class with the isDarkMode state
+  useEffect(() => {
+    if (!mounted) return;
+    const root = window.document.documentElement;
+    if (isDarkMode) {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+  }, [isDarkMode, mounted]);
+
+  const toggleDarkMode = useCallback(() => {
+    setIsDarkMode(prev => !prev);
+  }, []);
 
   const handleCalculate = useCallback(() => {
-    const grossIncome = incomeItems.reduce(
-      (sum, item) => sum + parseAmount(item.amount),
-      0
-    );
-    const totalDeductions = deductionItems.reduce(
-      (sum, item) => sum + parseAmount(item.amount),
-      0
-    );
-    const totalWithholding = withholdingItems.reduce(
-      (sum, item) => sum + parseAmount(item.amount),
-      0
-    );
+    // Only sum enabled items
+    const grossIncome = incomeItems
+      .filter((item) => item.enabled)
+      .reduce((sum, item) => sum + parseAmount(item.amount), 0);
+
+    const totalDeductions = deductionItems
+      .filter((item) => item.enabled)
+      .reduce((sum, item) => sum + parseAmount(item.amount), 0);
+
+    // Sum withholding from each enabled income item
+    const totalWithholding = incomeItems
+      .filter((item) => item.enabled)
+      .reduce((sum, item) => sum + parseAmount(item.withholding), 0);
 
     if (grossIncome <= 0 && totalDeductions <= 0 && totalWithholding <= 0) return;
 
@@ -245,269 +451,161 @@ export default function Home() {
     requestAnimationFrame(() => {
       setShowResult(true);
     });
-  }, [incomeItems, deductionItems, withholdingItems]);
+  }, [incomeItems, deductionItems]);
 
   return (
-    <div className="min-h-dvh flex flex-col">
+    <div className={`min-h-dvh flex flex-col bg-background text-on-background antialiased ${isDarkMode ? 'dark' : ''}`}>
       {/* ── Header ── */}
-      <header className="w-full py-5 px-4 sm:px-6">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[var(--accent-from)] to-[var(--accent-to)] flex items-center justify-center text-white font-bold text-sm shadow-lg">
-              ฿
-            </div>
-            <h1 className="text-lg sm:text-xl font-bold text-[var(--text-primary)]">
-              What&apos;s My Tax
-            </h1>
-          </div>
-          <span className="text-xs text-[var(--text-muted)] hidden sm:block">
-            Thailand Individual Income Tax • 2025
-          </span>
+      <header className="fixed top-0 w-full z-50 flex justify-between items-center px-6 h-16 bg-surface-container-lowest border-b border-outline-variant shadow-sm font-inter antialiased">
+        <div className="text-xl font-bold text-primary">What&apos;s My Tax</div>
+        <div className="flex items-center gap-4">
+          {mounted && (
+            <button 
+              type="button"
+              onClick={toggleDarkMode}
+              className="relative z-[60] p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-all active:scale-90 duration-150 flex items-center justify-center rounded-full"
+              aria-label="Toggle dark mode"
+            >
+              <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}>
+                {isDarkMode ? 'light_mode' : 'dark_mode'}
+              </span>
+            </button>
+          )}
         </div>
       </header>
 
       {/* ── Main ── */}
-      <main className="flex-1 flex items-start justify-center px-4 sm:px-6 py-6 sm:py-10">
-        <div className="w-full max-w-xl space-y-6">
-          {/* Hero */}
-          <div className="text-center space-y-2 mb-2">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold gradient-text leading-tight">
-              คำนวณภาษีเงินได้
-            </h2>
-            <p className="text-sm sm:text-base text-[var(--text-secondary)] max-w-md mx-auto">
-              กรอกรายได้ ลดหย่อน และหัก ณ ที่จ่าย เพื่อคำนวณภาษีเงินได้บุคคลธรรมดา
-              ตามอัตราก้าวหน้าของกรมสรรพากร ปี 2568
-            </p>
-          </div>
+      <main className="flex-grow pt-24 pb-12 px-4 md:px-8 max-w-7xl mx-auto w-full">
+        <section className="text-center mb-12">
+          <h1 className="text-4xl md:text-5xl font-extrabold text-on-surface mb-4 tracking-tight">
+            คำนวณภาษีเงินได้
+          </h1>
+          <p className="text-lg text-outline max-w-4xl mx-auto">
+            กรอกรายได้และค่าลดหย่อน เพื่อคำนวณภาษีเงินได้บุคคลธรรมดา ตามอัตราก้าวหน้าของกรมสรรพากร ปี 2568
+          </p>
+        </section>
 
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Calculator Card */}
-          <div className="glass-card p-5 sm:p-7 space-y-5" id="calculator-card">
-            {/* Income Items */}
-            <ItemListSection
-              title="เงินได้"
-              items={incomeItems}
-              setItems={setIncomeItems}
-              addLabel="เพิ่มรายได้"
-              namePlaceholder="ชื่อรายได้"
-              amountPlaceholder="จำนวนเงิน"
-              sectionId="income-section"
-            />
+          <div className="lg:col-span-8 bg-surface-container-lowest rounded-xl shadow-xl shadow-surface-container/20 border border-outline-variant overflow-hidden" id="calculator-card">
+            <div className="p-6 md:p-8 grid grid-cols-1 gap-10">
+              <IncomeListSection
+                title="เงินได้ (Income Details)"
+                items={incomeItems}
+                setItems={setIncomeItems}
+                addLabel="เพิ่มรายได้"
+              />
 
-            <hr className="section-divider" />
+              <hr className="border-outline-variant" />
 
-            {/* Deduction Items */}
-            <ItemListSection
-              title="ค่าลดหย่อน"
-              items={deductionItems}
-              setItems={setDeductionItems}
-              addLabel="เพิ่มลดหย่อน"
-              namePlaceholder="ชื่อรายการลดหย่อน"
-              amountPlaceholder="จำนวนเงิน"
-              sectionId="deduction-section"
-            />
+              <DeductionListSection
+                title="ค่าลดหย่อน (Deductions & Allowances)"
+                items={deductionItems}
+                setItems={setDeductionItems}
+                addLabel="เพิ่มลดหย่อน"
+              />
+            </div>
 
-            <hr className="section-divider" />
-
-            {/* Withholding Tax Items */}
-            <ItemListSection
-              title="หัก ณ ที่จ่าย"
-              items={withholdingItems}
-              setItems={setWithholdingItems}
-              addLabel="เพิ่มหัก ณ ที่จ่าย"
-              namePlaceholder="ชื่อรายการหัก ณ ที่จ่าย"
-              amountPlaceholder="จำนวนเงิน"
-              sectionId="withholding-section"
-            />
-
-            {/* Calculate Button */}
-            <button
-              id="calculate-btn"
-              className="btn-primary"
-              onClick={handleCalculate}
-            >
-              คำนวณภาษี
-            </button>
+            <div className="bg-surface-container p-6 md:p-8 border-t border-outline-variant flex justify-center">
+              <button
+                id="calculate-btn"
+                className="bg-primary text-on-primary hover:bg-opacity-90 px-12 py-4 rounded-full font-bold text-lg shadow-lg shadow-primary/20 transition-all active:scale-95 flex items-center gap-2"
+                onClick={handleCalculate}
+              >
+                คำนวณภาษี
+                <span className="material-symbols-outlined" data-icon="calculate">calculate</span>
+              </button>
+            </div>
           </div>
 
-          {/* Results */}
-          {result && showResult && (
-            <div
-              className="glass-card p-5 sm:p-7 space-y-5 animate-fade-in"
-              id="results-panel"
-            >
-              {/* Summary Stats */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="stat-card">
-                  <p className="text-[var(--text-muted)] text-[0.65rem] uppercase tracking-wider mb-1">
-                    รายได้รวม
-                  </p>
-                  <p className="text-[var(--text-primary)] font-bold text-sm sm:text-base">
-                    {fmtCurrency(result.grossIncome)}
-                  </p>
-                </div>
-                <div className="stat-card">
-                  <p className="text-[var(--text-muted)] text-[0.65rem] uppercase tracking-wider mb-1">
-                    ลดหย่อนรวม
-                  </p>
-                  <p className="text-[var(--text-primary)] font-bold text-sm sm:text-base">
-                    {fmtCurrency(result.totalDeductions)}
-                  </p>
-                </div>
-                <div className="stat-card">
-                  <p className="text-[var(--text-muted)] text-[0.65rem] uppercase tracking-wider mb-1">
-                    เงินได้สุทธิ
-                  </p>
-                  <p className="text-[var(--text-primary)] font-bold text-sm sm:text-base">
-                    {fmtCurrency(result.netIncome)}
-                  </p>
-                </div>
-                <div className="stat-card">
-                  <p className="text-[var(--text-muted)] text-[0.65rem] uppercase tracking-wider mb-1">
-                    อัตราภาษีเฉลี่ย
-                  </p>
-                  <p className="text-[var(--success)] font-bold text-sm sm:text-base">
-                    {fmtPercent(result.effectiveRate)}
-                  </p>
-                </div>
-              </div>
-
-              {/* Calculation Summary */}
-              <div className="space-y-2">
-                <h3 className="text-xs uppercase tracking-wider text-[var(--text-muted)] font-semibold">
-                  สรุปการคำนวณ
-                </h3>
-                <div className="flex justify-between text-sm py-1">
-                  <span className="text-[var(--text-secondary)]">
-                    เงินได้รวม
-                  </span>
-                  <span className="text-[var(--text-primary)] font-medium">
-                    {fmtCurrency(result.grossIncome)}
-                  </span>
-                </div>
-                <div className="flex justify-between text-sm py-1">
-                  <span className="text-[var(--text-secondary)]">
-                    หัก ค่าลดหย่อนรวม
-                  </span>
-                  <span className="text-[var(--text-primary)] font-medium">
-                    −{fmtCurrency(result.totalDeductions)}
-                  </span>
-                </div>
-                <div className="flex justify-between text-sm py-1 border-t border-[var(--border-glass)] pt-2">
-                  <span className="text-[var(--text-primary)] font-semibold">
-                    เงินได้สุทธิ
-                  </span>
-                  <span className="text-[var(--text-primary)] font-bold">
-                    {fmtCurrency(result.netIncome)}
-                  </span>
-                </div>
-              </div>
-
-              {/* Bracket Breakdown — only show if net income > 0 */}
-              {result.netIncome > 0 && (
-                <div className="space-y-2">
-                  <h3 className="text-xs uppercase tracking-wider text-[var(--text-muted)] font-semibold">
-                    คำนวณภาษีตามขั้นบันได
-                  </h3>
-
-                  {/* Header row */}
-                  <div className="bracket-row text-[0.7rem] uppercase tracking-wider text-[var(--text-muted)] font-semibold border-b-0 pb-0">
-                    <span>ขั้นเงินได้ (บาท)</span>
-                    <span className="text-right">อัตรา</span>
-                    <span className="text-right">ภาษี</span>
+          {/* Results Sidebar */}
+          <div className="lg:col-span-4 space-y-6">
+            {result && showResult ? (
+              <div className="bg-surface-container-high rounded-xl p-6 border border-outline-variant animate-fade-in" id="results-panel">
+                <h3 className="text-sm font-bold text-secondary uppercase tracking-widest mb-6">สรุปภาษี (Tax Summary)</h3>
+                
+                <div className="space-y-6">
+                  <div>
+                    <p className="text-on-surface-variant text-sm mb-1">เงินได้สุทธิ (Net Income)</p>
+                    <p className="text-3xl font-extrabold text-on-surface">{fmtCurrency(result.netIncome).replace('฿', '')} <span className="text-sm font-normal text-outline">THB</span></p>
+                  </div>
+                  
+                  <div className="h-px bg-outline-variant w-full"></div>
+                  
+                  <div>
+                    <p className="text-on-surface-variant text-sm mb-1">ภาษีที่ต้องชำระ (Estimated Tax)</p>
+                    <p className="text-4xl font-extrabold text-primary">{fmtCurrency(result.totalTax).replace('฿', '')} <span className="text-base font-normal text-primary/80">THB</span></p>
                   </div>
 
-                  {/* Data rows */}
-                  {result.brackets.map((b, i) => (
-                    <div
-                      key={i}
-                      className="bracket-row"
-                      style={{
-                        animationDelay: `${i * 60}ms`,
-                      }}
-                    >
-                      <span className="text-[var(--text-secondary)]">
-                        {b.label}
-                      </span>
-                      <span className="text-right text-[var(--text-secondary)]">
-                        {b.rate === 0 ? "ยกเว้น" : fmtPercent(b.rate)}
-                      </span>
-                      <span className="text-right font-medium text-[var(--text-primary)]">
-                        {b.tax === 0 ? "" : fmtCurrency(b.tax)}
-                      </span>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-white/50 p-3 rounded-lg border border-white/80">
+                      <p className="text-xs text-outline uppercase font-bold">อัตราภาษีเฉลี่ย</p>
+                      <p className="text-xl font-bold text-on-surface">{fmtPercent(result.effectiveRate)}</p>
                     </div>
-                  ))}
-
-                  {/* Total tax from brackets */}
-                  <div className="flex justify-between pt-3 border-t border-[var(--border-glass)]">
-                    <span className="font-bold text-[var(--text-primary)] text-sm">
-                      ภาษีจากขั้นบันได
-                    </span>
-                    <span className="font-bold text-[var(--text-primary)] text-sm">
-                      {fmtCurrency(result.totalTax)}
-                    </span>
+                    <div className="bg-white/50 p-3 rounded-lg border border-white/80">
+                      <p className="text-xs text-outline uppercase font-bold">หัก ณ ที่จ่าย</p>
+                      <p className="text-xl font-bold text-on-surface text-ellipsis overflow-hidden truncate">{fmtCurrency(result.totalWithholding).replace('฿', '')}</p>
+                    </div>
                   </div>
-                </div>
-              )}
 
-              {/* Withholding & Final Result */}
-              <div className="space-y-2">
-                <h3 className="text-xs uppercase tracking-wider text-[var(--text-muted)] font-semibold">
-                  สรุปภาษี
-                </h3>
-                <div className="flex justify-between text-sm py-1">
-                  <span className="text-[var(--text-secondary)]">
-                    ภาษีที่คำนวณได้
-                  </span>
-                  <span className="text-[var(--text-primary)] font-medium">
-                    {fmtCurrency(result.totalTax)}
-                  </span>
-                </div>
-                <div className="flex justify-between text-sm py-1">
-                  <span className="text-[var(--text-secondary)]">
-                    หัก ณ ที่จ่ายรวม
-                  </span>
-                  <span className="text-[var(--text-primary)] font-medium">
-                    −{fmtCurrency(result.totalWithholding)}
-                  </span>
-                </div>
+                  {result.netIncome > 0 && (
+                    <div className="mt-4 space-y-2">
+                       <h4 className="text-xs uppercase tracking-wider text-outline font-bold">รายละเอียดตามขั้นบันได</h4>
+                       {result.brackets.map((b, i) => (
+                         <div key={i} className="bracket-row text-sm" style={{ animationDelay: `${i * 60}ms` }}>
+                             <span className="text-on-surface-variant">{b.label}</span>
+                             <div className="flex gap-2">
+                               <span className="text-right text-outline text-xs">{b.rate === 0 ? "ยกเว้น" : fmtPercent(b.rate)}</span>
+                               <span className="text-right font-medium text-on-surface max-w-[80px] truncate">{b.tax === 0 ? "-" : fmtCurrency(b.tax)}</span>
+                             </div>
+                         </div>
+                       ))}
+                    </div>
+                  )}
 
-                {/* Final outcome: pay or refund */}
-                {result.taxAfterWithholding > 0 ? (
-                  <div className="pay-card mt-3">
-                    <p className="text-[var(--text-muted)] text-xs uppercase tracking-wider mb-1">
-                      ภาษีที่ต้องชำระเพิ่ม
-                    </p>
-                    <p className="pay-text">
-                      {fmtCurrency(result.taxAfterWithholding)}
-                    </p>
-                  </div>
-                ) : (
-                  <div className="refund-card mt-3">
-                    <p className="text-[var(--text-muted)] text-xs uppercase tracking-wider mb-1">
-                      {result.refund > 0
-                        ? "เงินที่สามารถขอคืนภาษี"
-                        : "ภาษีที่ต้องชำระ"}
-                    </p>
-                    <p className="refund-text">
-                      {result.refund > 0
-                        ? fmtCurrency(result.refund)
-                        : fmtCurrency(0)}
-                    </p>
-                  </div>
-                )}
+                  {result.taxAfterWithholding > 0 ? (
+                    <div className="pay-card mt-6">
+                      <p className="text-error/80 text-xs uppercase tracking-wider mb-1 font-bold">ชำระเพิ่ม</p>
+                      <p className="pay-text">{fmtCurrency(result.taxAfterWithholding)}</p>
+                    </div>
+                  ) : (
+                    <div className="refund-card mt-6">
+                      <p className="text-success/80 text-xs uppercase tracking-wider mb-1 font-bold">{result.refund > 0 ? "ขอคืนภาษี" : "ภาษีที่ต้องชำระ"}</p>
+                      <p className="refund-text">{result.refund > 0 ? fmtCurrency(result.refund) : fmtCurrency(0)}</p>
+                    </div>
+                  )}
+                </div>
               </div>
+            ) : (
+              <div className="bg-surface-container-high rounded-xl p-6 border border-outline-variant flex items-center justify-center min-h-[400px]">
+                <div className="text-center text-outline">
+                  <span className="material-symbols-outlined text-4xl mb-2">analytics</span>
+                  <p>กรอกข้อมูลและคลิก "คำนวณภาษี"</p>
+                </div>
+              </div>
+            )}
+
+            {/* Help Card */}
+            <div className="bg-tertiary-fixed rounded-xl p-6 border border-tertiary-fixed-dim relative overflow-hidden group">
+              <div className="relative z-10">
+                <h4 className="text-on-tertiary-fixed font-bold mb-2">Need tax planning?</h4>
+                <p className="text-on-tertiary-fixed-variant text-sm mb-4">Discover ways to reduce your tax liability with an optimized allowance guide.</p>
+                <button className="bg-on-tertiary-fixed text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm">Explore Guides</button>
+              </div>
+              <span className="material-symbols-outlined absolute -bottom-4 -right-4 text-8xl text-on-tertiary-fixed/10 rotate-12 group-hover:scale-110 transition-transform">lightbulb</span>
             </div>
-          )}
+          </div>
         </div>
       </main>
 
       {/* ── Footer ── */}
-      <footer className="w-full py-5 px-4 sm:px-6 border-t border-[var(--border-glass)]">
-        <div className="max-w-4xl mx-auto text-center text-xs text-[var(--text-muted)] space-y-1">
-          <p>
-            อ้างอิงอัตราภาษีเงินได้บุคคลธรรมดาจากกรมสรรพากร ปี 2568
-          </p>
-          <p>เพื่อการคำนวณเบื้องต้นเท่านั้น ไม่ใช่คำแนะนำด้านภาษีจากผู้เชี่ยวชาญ</p>
+      <footer className="w-full py-8 px-6 flex flex-col md:flex-row justify-between items-center gap-4 bg-surface-container border-t border-outline-variant mt-auto">
+        <div className="text-lg font-bold text-on-surface">What&apos;s My Tax</div>
+        <div className="flex flex-wrap justify-center gap-6">
+          <span className="text-sm font-body text-on-surface-variant">อ้างอิงอัตราภาษีเงินได้บุคคลธรรมดา ปี 2568</span>
+        </div>
+        <div className="text-sm font-body text-outline">
+          © 2025 What&apos;s My Tax. All rights reserved.
         </div>
       </footer>
     </div>
