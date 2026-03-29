@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
+import { Wallet, PiggyBank, Calculator, Sun, Moon, BarChart3, Lightbulb, Trash2, Plus } from "lucide-react";
 
 /* ── Thailand 2025 Progressive Tax Brackets ── */
 const TAX_BRACKETS = [
@@ -241,7 +242,7 @@ function IncomeListSection({
   return (
     <div id="income-section" className="space-y-6">
       <div className="flex items-center gap-2 mb-2">
-        <span className="material-symbols-outlined text-primary">payments</span>
+        <Wallet className="w-6 h-6 text-primary" />
         <h2 className="text-xl font-bold text-on-surface">{title}</h2>
       </div>
       <div className="items-list space-y-4">
@@ -284,13 +285,13 @@ function IncomeListSection({
                 onClick={() => handleRemove(item.id)}
                 aria-label="ลบรายการ"
               >
-                ×
+                <Trash2 className="w-4 h-4" />
               </button>
             </div>
           </div>
         ))}
         <button className="btn-add" onClick={handleAdd}>
-          <span className="icon-plus">+</span> {addLabel}
+          <Plus className="w-5 h-5 mr-1" /> {addLabel}
         </button>
       </div>
     </div>
@@ -342,7 +343,7 @@ function DeductionListSection({
   return (
     <div id="deduction-section" className="space-y-6">
       <div className="flex items-center gap-2 mb-2">
-        <span className="material-symbols-outlined text-primary">savings</span>
+        <PiggyBank className="w-6 h-6 text-primary" />
         <h2 className="text-xl font-bold text-on-surface">{title}</h2>
       </div>
       <div className="items-list space-y-4">
@@ -377,7 +378,7 @@ function DeductionListSection({
               onClick={() => handleRemove(item.id)}
               aria-label="ลบรายการ"
             >
-              ×
+              <Trash2 className="w-4 h-4" />
             </button>
             </div>
           </div>
@@ -392,8 +393,50 @@ function DeductionListSection({
 
 /* ── Main Page Component ── */
 export default function Home() {
-  const [incomeItems, setIncomeItems] = useState<IncomeItem[]>([createEmptyIncomeItem()]);
-  const [deductionItems, setDeductionItems] = useState<DeductionItem[]>([]);
+  const [incomeItems, setIncomeItems] = useState<IncomeItem[]>([{
+    id: '1',
+    name: 'เงินเดือน',
+    amount: '0',
+    withholding: '0',
+    enabled: true,
+  },{
+    id: '2',
+    name: 'เงินปันผล',
+    amount: '0',
+    withholding: '0',
+    enabled: true,
+  },
+  {
+    id: '3',
+    name: 'ดอกเบี้ยเงินฝาก',
+    amount: '0',
+    withholding: '0',
+    enabled: true,
+  },]);
+  const [deductionItems, setDeductionItems] = useState<DeductionItem[]>([{
+      id: '1',
+      name: 'ค่าลดหย่อนส่วนตัว',
+      amount: '60000',
+      enabled: true,
+    },
+    {
+      id: '2',
+      name: 'ค่าใช้จ่าย (เหมา)',
+      amount: '100000',
+      enabled: true,
+    },
+    {
+      id: '3',
+      name: 'ประกันสังคม',
+      amount: '0',
+      enabled: true,
+    },
+    {
+      id: '4',
+      name: 'เงินบริจาค',
+      amount: '0',
+      enabled: true,
+    },]);
   const [result, setResult] = useState<TaxResult | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -466,9 +509,7 @@ export default function Home() {
               className="relative z-[60] p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-all active:scale-90 duration-150 flex items-center justify-center rounded-full"
               aria-label="Toggle dark mode"
             >
-              <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}>
-                {isDarkMode ? 'light_mode' : 'dark_mode'}
-              </span>
+              {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>
           )}
         </div>
@@ -513,7 +554,7 @@ export default function Home() {
                 onClick={handleCalculate}
               >
                 คำนวณภาษี
-                <span className="material-symbols-outlined" data-icon="calculate">calculate</span>
+                <Calculator className="w-6 h-6" />
               </button>
             </div>
           </div>
@@ -534,17 +575,17 @@ export default function Home() {
                   
                   <div>
                     <p className="text-on-surface-variant text-sm mb-1">ภาษีที่ต้องชำระ (Estimated Tax)</p>
-                    <p className="text-4xl font-extrabold text-primary">{fmtCurrency(result.totalTax).replace('฿', '')} <span className="text-base font-normal text-primary/80">THB</span></p>
+                    <p className="text-4xl font-extrabold text-primary">{fmtCurrency(result.totalTax - result.totalWithholding).replace('฿', '')} <span className="text-base font-normal text-primary/80">THB</span></p>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-white/50 p-3 rounded-lg border border-white/80">
-                      <p className="text-xs text-outline uppercase font-bold">อัตราภาษีเฉลี่ย</p>
-                      <p className="text-xl font-bold text-on-surface">{fmtPercent(result.effectiveRate)}</p>
+                    <div className="bg-surface-container-lowest p-4 rounded-xl border border-outline-variant shadow-sm">
+                      <p className="text-[10px] text-on-surface-variant uppercase font-bold tracking-wider mb-1">อัตราภาษีเฉลี่ย</p>
+                      <p className="text-2xl font-extrabold text-on-surface">{fmtPercent(result.effectiveRate)}</p>
                     </div>
-                    <div className="bg-white/50 p-3 rounded-lg border border-white/80">
-                      <p className="text-xs text-outline uppercase font-bold">หัก ณ ที่จ่าย</p>
-                      <p className="text-xl font-bold text-on-surface text-ellipsis overflow-hidden truncate">{fmtCurrency(result.totalWithholding).replace('฿', '')}</p>
+                    <div className="bg-surface-container-lowest p-4 rounded-xl border border-outline-variant shadow-sm">
+                      <p className="text-[10px] text-on-surface-variant uppercase font-bold tracking-wider mb-1">หัก ณ ที่จ่าย</p>
+                      <p className="text-2xl font-extrabold text-on-surface truncate">{fmtCurrency(result.totalWithholding).replace('฿', '')}</p>
                     </div>
                   </div>
 
@@ -556,44 +597,45 @@ export default function Home() {
                              <span className="text-on-surface-variant">{b.label}</span>
                              <div className="flex gap-2">
                                <span className="text-right text-outline text-xs">{b.rate === 0 ? "ยกเว้น" : fmtPercent(b.rate)}</span>
-                               <span className="text-right font-medium text-on-surface max-w-[80px] truncate">{b.tax === 0 ? "-" : fmtCurrency(b.tax)}</span>
+                               <span className="text-right font-medium text-on-surface max-w-[80px] truncate">{b.tax === 0 ? "" : fmtCurrency(b.tax)}</span>
                              </div>
                          </div>
                        ))}
                     </div>
                   )}
 
-                  {result.taxAfterWithholding > 0 ? (
-                    <div className="pay-card mt-6">
-                      <p className="text-error/80 text-xs uppercase tracking-wider mb-1 font-bold">ชำระเพิ่ม</p>
-                      <p className="pay-text">{fmtCurrency(result.taxAfterWithholding)}</p>
-                    </div>
-                  ) : (
-                    <div className="refund-card mt-6">
-                      <p className="text-success/80 text-xs uppercase tracking-wider mb-1 font-bold">{result.refund > 0 ? "ขอคืนภาษี" : "ภาษีที่ต้องชำระ"}</p>
-                      <p className="refund-text">{result.refund > 0 ? fmtCurrency(result.refund) : fmtCurrency(0)}</p>
-                    </div>
-                  )}
                 </div>
               </div>
             ) : (
               <div className="bg-surface-container-high rounded-xl p-6 border border-outline-variant flex items-center justify-center min-h-[400px]">
                 <div className="text-center text-outline">
-                  <span className="material-symbols-outlined text-4xl mb-2">analytics</span>
+                  <BarChart3 className="w-12 h-12 mx-auto mb-2 opacity-50" />
                   <p>กรอกข้อมูลและคลิก "คำนวณภาษี"</p>
                 </div>
               </div>
             )}
 
             {/* Help Card */}
-            <div className="bg-tertiary-fixed rounded-xl p-6 border border-tertiary-fixed-dim relative overflow-hidden group">
+            <div className="bg-help-card-bg rounded-xl p-8 md:p-9 relative overflow-hidden group shadow-lg shadow-help-card-bg/20 border border-black/5 dark:border-white/5">
               <div className="relative z-10">
-                <h4 className="text-on-tertiary-fixed font-bold mb-2">Need tax planning?</h4>
-                <p className="text-on-tertiary-fixed-variant text-sm mb-4">Discover ways to reduce your tax liability with an optimized allowance guide.</p>
-                <button className="bg-on-tertiary-fixed text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm">Explore Guides</button>
+                <h4 className="text-help-card-text text-[24px] font-bold mb-3 tracking-tight">ความรู้เรื่องภาษี</h4>
+                <p className="text-help-card-text/80 text-[16px] mb-8 leading-relaxed max-w-[360px]">
+                  การที่รู้ว่าเรามี "รายได้" ประเภทไหน หัก "ค่าใช้จ่ายและค่าลดหย่อน" ได้เท่าไหร่ เพื่อคำนวณ "เงินได้สุทธิ" มาคิดภาษีตามอัตราขั้นบันได
+                  รวมถึง "หน้าที่ในการยื่นแบบ" ให้ถูกต้องตามกำหนดเวลานั้น เพื่อสิทธิประโยชน์ในการลดหย่อนและการขอคืนภาษีที่จ่ายเกินกับสรรพากร
+                </p>
+                <button 
+                  onClick={() => window.open('https://www.rd.go.th/62337.html', '_blank')}
+                  className="bg-help-card-btn-bg text-help-card-btn-text px-8 py-3.5 rounded-2xl text-[16px] font-bold shadow-md transition-all hover:scale-[1.02] hover:brightness-110 active:scale-95"
+                >
+                  ศึกษาเพิ่มเติม
+                </button>
+
               </div>
-              <span className="material-symbols-outlined absolute -bottom-4 -right-4 text-8xl text-on-tertiary-fixed/10 rotate-12 group-hover:scale-110 transition-transform">lightbulb</span>
+              <div className="absolute -bottom-12 -right-12 w-48 h-48 text-help-card-icon -rotate-12 group-hover:scale-110 transition-transform duration-1000 ease-out">
+                <Lightbulb className="w-full h-full" />
+              </div>
             </div>
+
           </div>
         </div>
       </main>
