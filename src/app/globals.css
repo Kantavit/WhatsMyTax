@@ -112,7 +112,7 @@
   --app-color-inverse-primary: #43e17b;
   --app-color-surface-variant: #dce5d9;
   --app-color-on-secondary-container: #326f42;
-  --app-color-error: #ba1a1a;
+  --app-color-error: #dc2626;
   --app-color-background: #f3fcf0;
 
   --app-color-help-card-bg: #fedbcd;
@@ -169,7 +169,7 @@
   --app-color-inverse-primary: #006d33;
   --app-color-surface-variant: #434943;
   --app-color-on-secondary-container: #b1f2ba;
-  --app-color-error: #ffb4ab;
+  --app-color-error: #ef4444;
   --app-color-background: #0f140f;
 
   --app-color-help-card-bg: #783718;
@@ -366,18 +366,18 @@ body {
   align-items: center;
   justify-content: center;
   background: transparent;
-  border: 1px solid rgba(239, 68, 68, 0.2);
+  border: 1px solid color-mix(in srgb, var(--color-error), transparent 80%);
   border-radius: 0.5rem;
-  color: var(--error);
+  color: var(--color-error);
   font-size: 1rem;
   cursor: pointer;
-  transition: background 0.2s ease, border-color 0.2s ease;
-  opacity: 0.6;
+  transition: all 0.2s ease;
+  opacity: 0.9;
 }
 
 .btn-remove:hover {
-  background: rgba(239, 68, 68, 0.1);
-  border-color: var(--error);
+  background: color-mix(in srgb, var(--color-error), transparent 90%);
+  border-color: var(--color-error);
   opacity: 1;
 }
 
@@ -412,15 +412,15 @@ body {
 
 /* ── Pay highlight ── */
 .pay-card {
-  background: rgba(239, 68, 68, 0.08);
-  border: 1px solid rgba(239, 68, 68, 0.25);
+  background: color-mix(in srgb, var(--color-error), transparent 92%);
+  border: 1px solid color-mix(in srgb, var(--color-error), transparent 75%);
   border-radius: var(--radius-lg);
   padding: 1rem 1.25rem;
   text-align: center;
 }
 
 .pay-text {
-  color: var(--error);
+  color: var(--color-error);
   font-weight: 700;
   font-size: 1.25rem;
 }
