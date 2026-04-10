@@ -139,7 +139,7 @@ function parseAmount(formatted: string): number {
 /** Format amount input to allow commas and up to 2 decimal places */
 function formatAmountInput(value: string): string {
   // Remove everything except digits, dots, and commas
-  let raw = value.replace(/[^0-9.]/g, "");
+  const raw = value.replace(/[^0-9.]/g, "");
 
   // Handle multiple dots — keep only the first one
   const dotIndex = raw.indexOf(".");
@@ -444,6 +444,7 @@ export default function Home() {
 
   // Handle system preference on mount and live-updates
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     
@@ -610,7 +611,7 @@ export default function Home() {
               <div className="bg-surface-container-high rounded-xl p-6 border border-outline-variant flex items-center justify-center min-h-[400px]">
                 <div className="text-center text-outline">
                   <BarChart3 className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                  <p>กรอกข้อมูลและคลิก "คำนวณภาษี"</p>
+                  <p>กรอกข้อมูลและคลิก &quot;คำนวณภาษี&quot;</p>
                 </div>
               </div>
             )}
@@ -620,8 +621,8 @@ export default function Home() {
               <div className="relative z-10">
                 <h4 className="text-help-card-text text-[24px] font-bold mb-3 tracking-tight">ความรู้เรื่องภาษี</h4>
                 <p className="text-help-card-text/80 text-[16px] mb-8 leading-relaxed max-w-[360px]">
-                  การที่รู้ว่าเรามี "รายได้" ประเภทไหน หัก "ค่าใช้จ่ายและค่าลดหย่อน" ได้เท่าไหร่ เพื่อคำนวณ "เงินได้สุทธิ" มาคิดภาษีตามอัตราขั้นบันได
-                  รวมถึง "หน้าที่ในการยื่นแบบ" ให้ถูกต้องตามกำหนดเวลานั้น เพื่อสิทธิประโยชน์ในการลดหย่อนและการขอคืนภาษีที่จ่ายเกินกับสรรพากร
+                  การที่รู้ว่าเรามี &quot;รายได้&quot; ประเภทไหน หัก &quot;ค่าใช้จ่ายและค่าลดหย่อน&quot; ได้เท่าไหร่ เพื่อคำนวณ &quot;เงินได้สุทธิ&quot; มาคิดภาษีตามอัตราขั้นบันได
+                  รวมถึง &quot;หน้าที่ในการยื่นแบบ&quot; ให้ถูกต้องตามกำหนดเวลานั้น เพื่อสิทธิประโยชน์ในการลดหย่อนและการขอคืนภาษีที่จ่ายเกินกับสรรพากร
                 </p>
                 <button 
                   onClick={() => window.open('https://www.rd.go.th/62337.html', '_blank')}
