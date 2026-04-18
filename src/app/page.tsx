@@ -600,72 +600,93 @@ export default function Home() {
                 className="bg-surface-container-high rounded-xl p-6 border border-outline-variant animate-fade-in"
                 id="results-panel"
               >
-                <h3 className="text-sm font-bold text-secondary uppercase tracking-widest mb-6">
+                <h3 className="text-[24px] font-bold  text-secondary uppercase mb-6">
                   สรุปภาษี (Tax Summary)
                 </h3>
 
                 <div className="space-y-6">
+                  {/* Net Income Breakdown */}
+                  <div className="space-y-1.5">
+                    {/* รวมเงินได้ */}
+                    <div className="flex justify-between items-baseline text-sm">
+                      <span className="text-on-surface-variant">เงินได้</span>
+                      <span className="font-semibold text-on-surface tabular-nums">
+                        {fmtCurrency(result.grossIncome)}
+                      </span>
+                    </div>
+
+                    {/* หักค่าลดหย่อนทีละรายการ */}
+                    {deductionItems
+                      .filter(
+                        (item) => item.enabled && parseAmount(item.amount) > 0,
+                      )
+                      .map((item) => (
+                        <div
+                          key={item.id}
+                          className="flex justify-between items-baseline text-sm"
+                        >
+                          <span className="text-on-surface-variant truncate max-w-[55%]">
+                            − {item.name || "ค่าลดหย่อน"}
+                          </span>
+                          <span className="text-outline tabular-nums">
+                            {fmtCurrency(parseAmount(item.amount))}
+                          </span>
+                        </div>
+                      ))}
+
+                    {/* divider */}
+                    <div className="border-t border-dashed border-outline-variant pt-1.5 mt-1">
+                      <div className="flex justify-between items-baseline">
+                        <p className="text-on-surface-variant text-sm pt-4">
+                          เงินได้สุทธิ (Net Income)
+                        </p>
+                        <p className="text-2xl font-extrabold text-on-surface tabular-nums">
+                          {fmtCurrency(result.netIncome).replace("฿", "")}{" "}
+                          <span className="text-xs font-normal text-outline">
+                            THB
+                          </span>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="h-px bg-outline-variant w-full"></div>
+
+                  {/* ภาษีที่ต้องชำระ */}
                   <div>
-                    <p className="text-on-surface-variant text-sm mb-1">
-                      เงินได้สุทธิ (Net Income)
+                    <p className="text-on-surface-variant text-md font-bold mb-1">
+                      ภาษีที่ต้องชำระ (Estimated Tax)
                     </p>
-                    <p className="text-3xl font-extrabold text-on-surface">
-                      {fmtCurrency(result.netIncome).replace("฿", "")}{" "}
-                      <span className="text-sm font-normal text-outline">
+                    <p className="text-4xl font-extrabold text-primary">
+                      {fmtCurrency(result.totalTax).replace("฿", "")}{" "}
+                      <span className="text-base font-normal text-primary/80">
                         THB
                       </span>
                     </p>
                   </div>
 
-                  <div className="h-px bg-outline-variant w-full"></div>
-
+                  {/* เงินภาษีที่ขอคืนได้ */}
                   <div>
-                    {result.totalTax === 0 && result.totalWithholding > 0 ? (
-                      <>
-                        <p className="text-on-surface-variant text-sm mb-1">
-                          เงินภาษีที่ขอคืนได้ (Tax Refund)
-                        </p>
-                        <p className="text-4xl font-extrabold text-primary">
-                          {fmtCurrency(result.totalWithholding).replace(
-                            "฿",
-                            "",
-                          )}{" "}
-                          <span className="text-base font-normal text-primary/80">
-                            THB
-                          </span>
-                        </p>
-                      </>
-                    ) : (
-                      <>
-                        <p className="text-on-surface-variant text-sm mb-1">
-                          ภาษีที่ต้องชำระ (Estimated Tax)
-                        </p>
-                        <p className="text-4xl font-extrabold text-primary">
-                          {fmtCurrency(result.taxAfterWithholding).replace(
-                            "฿",
-                            "",
-                          )}{" "}
-                          <span className="text-base font-normal text-primary/80">
-                            THB
-                          </span>
-                        </p>
-                      </>
-                    )}
+                    <p className="text-on-surface-variant text-md font-bold mb-1">
+                      เงินภาษีที่ขอคืนได้ (Tax Refund)
+                    </p>
+                    <p className="text-4xl font-extrabold text-emerald-500 dark:text-emerald-400">
+                      {fmtCurrency(result.refund).replace("฿", "")}{" "}
+                      <span className="text-base font-normal text-emerald-500/70 dark:text-emerald-400/70">
+                        THB
+                      </span>
+                    </p>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     {/* <div className="bg-surface-container-lowest p-4 rounded-xl border border-outline-variant shadow-sm">
-                      <p className="text-[10px] text-on-surface-variant uppercase font-bold tracking-wider mb-1">อัตราภาษีเฉลี่ย</p>
-                      <p className="text-2xl font-extrabold text-on-surface">{fmtPercent(result.effectiveRate)}</p>
-                    </div> */}
-                    <div className="bg-surface-container-lowest p-4 rounded-xl border border-outline-variant shadow-sm">
                       <p className="text-[12px] text-on-surface-variant uppercase font-bold tracking-wider mb-1">
                         หัก ณ ที่จ่าย
                       </p>
                       <p className="text-2xl font-extrabold text-on-surface truncate">
                         {fmtCurrency(result.totalWithholding).replace("฿", "")}
                       </p>
-                    </div>
+                    </div> */}
                   </div>
 
                   {result.netIncome > 0 && (
@@ -708,7 +729,7 @@ export default function Home() {
             {/* Help Card */}
             <div className="bg-help-card-bg rounded-xl p-8 md:p-9 relative overflow-hidden group shadow-lg shadow-help-card-bg/20 border border-black/5 dark:border-white/5">
               <div className="relative z-10">
-                <h4 className="text-help-card-text text-[24px] font-bold mb-3 tracking-tight">
+                <h4 className="text-help-card-text text-[24px] font-bold mb-3 ">
                   ความรู้เรื่องภาษี
                 </h4>
                 <p className="text-help-card-text/80 text-[16px] mb-8 leading-relaxed max-w-[360px]">
