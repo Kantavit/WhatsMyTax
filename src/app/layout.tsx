@@ -52,6 +52,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <script
+          id="dark-mode-init"
           dangerouslySetInnerHTML={{
             __html: `
               try {
