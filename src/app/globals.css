@@ -1,8 +1,6 @@
-
 @import "tailwindcss";
 
 /* ── Design Tokens ── */
-
 
 @theme {
   --color-on-tertiary-fixed-variant: var(--app-color-on-tertiary-fixed-variant);
@@ -36,7 +34,9 @@
   --color-on-primary-fixed: var(--app-color-on-primary-fixed);
   --color-inverse-surface: var(--app-color-inverse-surface);
   --color-on-tertiary-fixed: var(--app-color-on-tertiary-fixed);
-  --color-on-secondary-fixed-variant: var(--app-color-on-secondary-fixed-variant);
+  --color-on-secondary-fixed-variant: var(
+    --app-color-on-secondary-fixed-variant
+  );
   --color-tertiary-fixed-dim: var(--app-color-tertiary-fixed-dim);
   --color-secondary-fixed: var(--app-color-secondary-fixed);
   --color-primary-container: var(--app-color-primary-container);
@@ -58,7 +58,6 @@
   --color-help-card-btn-bg: var(--app-color-help-card-btn-bg);
   --color-help-card-btn-text: var(--app-color-help-card-btn-text);
   --color-help-card-icon: var(--app-color-help-card-icon);
-
 
   --font-sans: var(--font-inter), "Inter", system-ui, -apple-system, sans-serif;
 }
@@ -120,7 +119,6 @@
   --app-color-help-card-btn-bg: #360f00;
   --app-color-help-card-btn-text: #ffffff;
   --app-color-help-card-icon: rgba(54, 15, 0, 0.1);
-
 }
 
 .dark {
@@ -177,7 +175,6 @@
   --app-color-help-card-btn-bg: #fedbcd;
   --app-color-help-card-btn-text: #360f00;
   --app-color-help-card-icon: rgba(255, 255, 255, 0.05);
-
 }
 
 /* ── Global Resets ── */
@@ -192,7 +189,6 @@ body {
   min-height: 100dvh;
   overflow-x: hidden;
 }
-
 
 /* ── Results Breakdown Row ── */
 .bracket-row {
@@ -318,7 +314,9 @@ body {
   padding: 0.5rem 0.75rem;
   color: var(--color-on-surface);
   font-size: 0.875rem;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
   outline: none;
 }
 
@@ -348,14 +346,16 @@ body {
   font-size: 0.8125rem;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
 }
 
 .btn-add:hover {
   background: var(--color-surface-container-high);
   border-color: var(--color-primary);
 }
-
 
 /* ── Remove Button ── */
 .btn-remove {
@@ -379,6 +379,47 @@ body {
   background: color-mix(in srgb, var(--color-error), transparent 90%);
   border-color: var(--color-error);
   opacity: 1;
+}
+
+/* ── Column Header Row ── */
+.item-header {
+  animation: none !important;
+  border-bottom: 1px solid var(--color-outline-variant);
+  padding-bottom: 0.375rem;
+  margin-bottom: 0.125rem;
+}
+
+/* Invisible spacer matching toggle-switch size */
+.toggle-switch-placeholder {
+  width: 2.5rem;
+  height: 1.375rem;
+  flex-shrink: 0;
+}
+
+/* Invisible spacer matching btn-remove size */
+.btn-remove-placeholder {
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+}
+
+/* Override input styles so header labels look like labels, not inputs */
+.item-header-label {
+  background: transparent !important;
+  border-color: transparent !important;
+  padding: 0.5rem 0.75rem !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  color: var(--color-outline) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .item-header {
+    display: none;
+  }
 }
 
 /* ── Items List Container ── */
@@ -434,7 +475,9 @@ body {
   border-radius: 999px;
   border: none;
   cursor: pointer;
-  transition: background 0.25s ease, box-shadow 0.25s ease;
+  transition:
+    background 0.25s ease,
+    box-shadow 0.25s ease;
   outline: none;
   padding: 0;
 }
@@ -485,7 +528,10 @@ body {
   padding: 0.5rem 0.625rem;
   border-radius: 0.5rem;
   border: 1px solid transparent;
-  transition: opacity 0.3s ease, border-color 0.2s ease, background 0.2s ease;
+  transition:
+    opacity 0.3s ease,
+    border-color 0.2s ease,
+    background 0.2s ease;
 }
 
 .item-block:hover {
@@ -519,7 +565,7 @@ body {
 }
 
 .item-disabled .input-name,
-.item-disabled .input-amount{
+.item-disabled .input-amount {
   pointer-events: none;
 }
 

@@ -55,6 +55,13 @@ export function DeductionListSection({
         <h2 className="text-xl font-bold text-on-surface">{title}</h2>
       </div>
       <div className="items-list space-y-4">
+        {/* Column Headers */}
+        <div className="item-row item-header" aria-hidden="true">
+          <div className="toggle-switch-placeholder" />
+          <span className="input-name item-header-label">รายการ</span>
+          <span className="input-amount item-header-label">จำนวนเงิน</span>
+          <span className="btn-remove-placeholder" />
+        </div>
         {items.map((item) => (
           <div
             key={item.id}
@@ -77,7 +84,7 @@ export function DeductionListSection({
                 type="text"
                 inputMode="decimal"
                 className="input-amount"
-                placeholder="จำนวนเงิน"
+                placeholder="0"
                 value={item.amount}
                 onChange={(e) => handleAmountChange(item.id, e.target.value)}
               />
