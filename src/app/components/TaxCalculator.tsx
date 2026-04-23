@@ -146,7 +146,7 @@ export function TaxCalculator() {
             <div className="bg-surface-container p-6 md:p-8 border-t border-outline-variant flex justify-center">
               <button
                 id="calculate-btn"
-                className="bg-primary text-on-primary hover:bg-opacity-90 px-12 py-4 rounded-full font-bold text-lg shadow-lg shadow-primary/20 transition-all active:scale-95 flex items-center gap-2"
+                className="cursor-pointer bg-primary text-on-primary px-12 py-4 rounded-full font-bold text-lg shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] hover:brightness-110 active:scale-95 flex items-center gap-2"
                 onClick={handleCalculate}
               >
                 คำนวณภาษี

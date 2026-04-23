@@ -17,7 +17,7 @@ export function Header({ isDarkMode, toggleDarkMode, mounted }: HeaderProps) {
           <button
             type="button"
             onClick={toggleDarkMode}
-            className="relative z-[60] p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-all active:scale-90 duration-150 flex items-center justify-center rounded-full"
+            className="cursor-pointer relative z-[60] p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-all active:scale-90 duration-150 flex items-center justify-center rounded-full"
             aria-label="Toggle dark mode"
           >
             {isDarkMode ? (

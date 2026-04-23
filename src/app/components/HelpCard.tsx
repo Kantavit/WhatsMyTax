@@ -20,7 +20,7 @@ export function HelpCard() {
           onClick={() =>
             window.open("https://www.rd.go.th/62337.html", "_blank")
           }
-          className="bg-help-card-btn-bg text-help-card-btn-text px-8 py-3.5 rounded-2xl text-[16px] font-bold shadow-md transition-all hover:scale-[1.02] hover:brightness-110 active:scale-95"
+          className="cursor-pointer bg-help-card-btn-bg text-help-card-btn-text px-8 py-3.5 rounded-2xl text-[16px] font-bold shadow-md transition-all hover:scale-[1.02] hover:brightness-110 active:scale-95"
         >
           ศึกษาเพิ่มเติม
         </button>
