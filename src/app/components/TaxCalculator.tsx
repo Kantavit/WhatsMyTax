@@ -1,13 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import {
-  Calculator,
-  ArrowRight,
-  FileText,
-  Plus,
-  Trash2,
-} from "lucide-react";
+import { Calculator, ArrowRight, FileText, Plus, Trash2 } from "lucide-react";
 import type { TaxResult } from "../types";
 import { parseAmount, calculateTax, formatAmountInput } from "../lib/tax";
 import { useDarkMode } from "../hooks/useDarkMode";
@@ -133,9 +127,9 @@ export function TaxCalculator() {
         {/* ── Hero Section ── */}
         <section className="pt-16 pb-12 px-4 md:px-8 max-w-5xl mx-auto">
           <h1 className="hero-title mb-4">
-            คำนวณภาษีเงินได้บุคคลธรรมดา
+            What's My Tax
             <br />
-            <span className="highlight">ถูกต้องแม่นยำในทุกรายละเอียด</span>
+            <span className="highlight">คำนวณภาษีเงินได้อย่างง่าย</span>
           </h1>
           <p className="text-on-surface-variant text-base md:text-lg max-w-xl mb-8 leading-relaxed">
             คำนวณภาษีเงินได้บุคคลธรรมดาในประเทศไทย อ้างอิงจากกรมสรรพากร

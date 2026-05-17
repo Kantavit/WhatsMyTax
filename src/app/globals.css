@@ -114,9 +114,21 @@ body {
   animation: fadeInUp 0.5s ease-out forwards;
 }
 @keyframes cardGlowPulse {
-  0%   { outline: 0px solid color-mix(in srgb, var(--color-primary), transparent 20%); box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-primary), transparent 40%); }
-  30%  { outline: 3px solid color-mix(in srgb, var(--color-primary), transparent 10%); box-shadow: 0 0 24px 8px color-mix(in srgb, var(--color-primary), transparent 50%); }
-  100% { outline: 0px solid color-mix(in srgb, var(--color-primary), transparent 100%); box-shadow: 0 0 0 0 transparent; }
+  0% {
+    outline: 0px solid color-mix(in srgb, var(--color-primary), transparent 20%);
+    box-shadow: 0 0 0 0
+      color-mix(in srgb, var(--color-primary), transparent 40%);
+  }
+  30% {
+    outline: 3px solid color-mix(in srgb, var(--color-primary), transparent 10%);
+    box-shadow: 0 0 24px 8px
+      color-mix(in srgb, var(--color-primary), transparent 50%);
+  }
+  100% {
+    outline: 0px solid
+      color-mix(in srgb, var(--color-primary), transparent 100%);
+    box-shadow: 0 0 0 0 transparent;
+  }
 }
 .card-glow {
   overflow: visible !important;
@@ -182,6 +194,7 @@ body {
 }
 .hero-title .highlight {
   color: var(--color-primary);
+  font-size: 0.8em;
 }
 
 .calc-card {
