@@ -139,7 +139,7 @@ export function TaxResultsPanel({ result, showResult }: TaxResultsPanelProps) {
         className="tip-card animate-fade-in"
         style={{ animationDelay: "150ms" }}
       >
-        <h4 className="text-md font-bold text-tip-card-text mb-2">
+        <h4 className="text-base font-bold text-tip-card-text mb-2">
           คำแนะนำในการประหยัดภาษี
         </h4>
         <p className="text-sm text-on-surface-variant leading-relaxed pr-10">
