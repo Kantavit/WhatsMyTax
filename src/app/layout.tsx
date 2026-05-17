@@ -10,36 +10,37 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: "What's My Tax — Thailand Income Tax Calculator",
-    template: "%s | What's My Tax",
+    default: "WhatsMyTax — คำนวณภาษีเงินได้บุคคลธรรมดา",
+    template: "%s | WhatsMyTax",
   },
   description:
-    "Calculate your Thai individual income tax easily. Free online tax calculator for Thailand with 2025 progressive tax brackets, deductions, and allowances.",
+    "คำนวณภาษีเงินได้บุคคลธรรมดาออนไลน์ ฟรี ใช้งานง่าย พร้อมอัตราภาษีขั้นบันได ค่าลดหย่อน และเงินหัก ณ ที่จ่าย",
   keywords: [
-    "Thai tax calculator",
-    "Thailand income tax",
-    "personal income tax Thailand",
-    "PIT Thailand",
-    "tax brackets Thailand 2025",
     "คำนวณภาษี",
     "ภาษีเงินได้บุคคลธรรมดา",
+    "คำนวณภาษีออนไลน์",
+    "อัตราภาษีขั้นบันได",
+    "ค่าลดหย่อนภาษี",
+    "หัก ณ ที่จ่าย",
+    "Thai tax calculator",
+    "Thailand income tax",
   ],
-  authors: [{ name: "What's My Tax" }],
+  authors: [{ name: "WhatsMyTax" }],
   robots: { index: true, follow: true },
   openGraph: {
     type: "website",
-    locale: "en_US",
-    siteName: "What's My Tax",
-    title: "What's My Tax — Thailand Income Tax Calculator",
+    locale: "th_TH",
+    siteName: "WhatsMyTax",
+    title: "WhatsMyTax — คำนวณภาษีเงินได้บุคคลธรรมดา",
     description:
-      "Free online calculator for Thai individual income tax. Instantly compute your tax liability with 2025 progressive brackets.",
+      "คำนวณภาษีเงินได้บุคคลธรรมดาออนไลน์ ฟรี ใช้งานง่าย พร้อมอัตราภาษีขั้นบันได ค่าลดหย่อน และเงินหัก ณ ที่จ่าย",
     url: "https://whatsmytax.app",
   },
   twitter: {
     card: "summary_large_image",
-    title: "What's My Tax — Thailand Income Tax Calculator",
+    title: "WhatsMyTax — คำนวณภาษีเงินได้บุคคลธรรมดา",
     description:
-      "Free online calculator for Thai individual income tax. Instantly compute your tax liability with 2025 progressive brackets.",
+      "คำนวณภาษีเงินได้บุคคลธรรมดาออนไลน์ ฟรี ใช้งานง่าย พร้อมอัตราภาษีขั้นบันได ค่าลดหย่อน และเงินหัก ณ ที่จ่าย",
   },
 };
 
@@ -49,23 +50,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <script
-          id="dark-mode-init"
-          dangerouslySetInnerHTML={{
-            __html: `
-              try {
-                if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                  document.documentElement.classList.add('dark');
-                } else {
-                  document.documentElement.classList.remove('dark');
-                }
-              } catch (_) {}
-            `,
-          }}
-        />
-      </head>
+    <html lang="th" suppressHydrationWarning>
       <body className={`${inter.variable} antialiased`}>{children}</body>
     </html>
   );

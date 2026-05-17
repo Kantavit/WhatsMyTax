@@ -85,7 +85,7 @@ export function calculateTax(
 
     const label =
       bracket.max === Infinity
-        ? `${fmt(bracket.min)}+`
+        ? `${fmt(bracket.min)} ขึ้นไป`
         : `${fmt(bracket.min)} – ${fmt(bracket.max)}`;
 
     brackets.push({ label, rate: bracket.rate, taxableInBracket, tax });
