@@ -11,10 +11,9 @@ interface HeaderProps {
 }
 
 const NAV_ITEMS = [
-  { href: "/", label: "Calculator" },
-  { href: "/tax-rates", label: "Tax Rates" },
-  { href: "/deductions", label: "Deductions" },
-  { href: "/guide", label: "Guide" },
+  { href: "/", label: "คำนวณภาษี" },
+  { href: "/tax-rates", label: "อัตราภาษี" },
+  { href: "/deductions", label: "ลดหย่อนภาษี" },
 ];
 
 export function Header({ isDarkMode, toggleDarkMode, mounted }: HeaderProps) {
