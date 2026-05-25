@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { TaxCalculator } from "./components/TaxCalculator";
 
 export const metadata: Metadata = {
-  title: "คำนวณภาษีเงินได้บุคคลธรรมดา",
+  title: "คำนวณภาษีเงินได้ — WhatsMyTax",
   description:
-    "กรอกรายได้และค่าลดหย่อน เพื่อคำนวณภาษีเงินได้บุคคลธรรมดาในประเทศไทย ปี 2568 พร้อมอัตราภาษีแบบขั้นบันได",
+    "คำนวณภาษีเงินได้บุคคลธรรมดาออนไลน์ ฟรี ใช้งานง่าย พร้อมอัตราภาษีขั้นบันได ค่าลดหย่อน และเงินหัก ณ ที่จ่าย",
 };
 
 export default function Home() {

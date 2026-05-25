@@ -1,21 +1,17 @@
 import Link from "next/link";
+import { AlertTriangle, ArrowLeft } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <div className="min-h-dvh flex flex-col items-center justify-center bg-background text-on-background antialiased px-6">
-      <div className="text-center max-w-md">
-        <h1 className="text-8xl font-extrabold text-primary mb-4">404</h1>
-        <h2 className="text-2xl font-bold text-on-surface mb-3">
-          ไม่พบหน้าที่คุณต้องการ
-        </h2>
-        <p className="text-outline mb-8">
-          หน้าเว็บที่คุณกำลังมองหาอาจถูกย้ายหรือไม่มีอยู่แล้ว
+    <div className="min-h-dvh flex flex-col bg-background text-on-background antialiased">
+      <div className="placeholder-page flex-grow">
+        <AlertTriangle className="w-16 h-16 text-primary opacity-30" />
+        <h1>404 — Page Not Found</h1>
+        <p>
+          The page you are looking for does not exist or has been moved.
         </p>
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 bg-primary text-on-primary px-8 py-3 rounded-full font-bold text-lg shadow-lg shadow-primary/20 transition-all hover:brightness-110 active:scale-95"
-        >
-          กลับหน้าหลัก
+        <Link href="/" className="btn-primary mt-4 no-underline">
+          <ArrowLeft className="w-4 h-4" /> Back to Calculator
         </Link>
       </div>
     </div>

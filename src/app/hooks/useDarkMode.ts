@@ -9,33 +9,24 @@ interface UseDarkModeReturn {
 }
 
 export function useDarkMode(): UseDarkModeReturn {
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true); // Dark mode is default
   const [mounted, setMounted] = useState(false);
 
-  // Handle system preference on mount and live-updates
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-
-    // Set initial state based on what the script added or media query
-    const isSystemDark =
-      document.documentElement.classList.contains("dark") || mediaQuery.matches;
-    setIsDarkMode(isSystemDark);
-
-    const handler = (e: MediaQueryListEvent) => setIsDarkMode(e.matches);
-    mediaQuery.addEventListener("change", handler);
-    return () => mediaQuery.removeEventListener("change", handler);
+    // On mount, check if light class was already added (shouldn't be now)
+    const isLight = document.documentElement.classList.contains("light");
+    setIsDarkMode(!isLight);
   }, []);
 
-  // Synchronize the 'dark' class with the isDarkMode state
+  // Sync the 'light' class on <html> with state
   useEffect(() => {
     if (!mounted) return;
     const root = window.document.documentElement;
     if (isDarkMode) {
-      root.classList.add("dark");
+      root.classList.remove("light");
     } else {
-      root.classList.remove("dark");
+      root.classList.add("light");
     }
   }, [isDarkMode, mounted]);
 

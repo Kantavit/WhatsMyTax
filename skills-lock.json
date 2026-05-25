@@ -4,12 +4,20 @@
     "next-best-practices": {
       "source": "vercel-labs/next-skills",
       "sourceType": "github",
-      "computedHash": "515ba75178bd44875812d9a560bdf14651f86709f89cf1d4f209638e879807f3"
+      "skillPath": "skills/next-best-practices/SKILL.md",
+      "computedHash": "f4678aef4ffc10a5ea64a91e57abe5a5081af813b06d58d565caf3e8ef56e26c"
     },
-    "nextjs-best-practices": {
-      "source": "sickn33/antigravity-awesome-skills",
+    "next-cache-components": {
+      "source": "vercel-labs/next-skills",
       "sourceType": "github",
-      "computedHash": "8f5b6b588c638139854181f80a241c16575810a3bd45b0983e55078b6aed347a"
+      "skillPath": "skills/next-cache-components/SKILL.md",
+      "computedHash": "f835d8226c28abf012cc013928e2627c8a7a046de61127ef229be1711bd1f255"
+    },
+    "next-upgrade": {
+      "source": "vercel-labs/next-skills",
+      "sourceType": "github",
+      "skillPath": "skills/next-upgrade/SKILL.md",
+      "computedHash": "e3aeb1f9e8a68d24df0c1c2e3c8ab97ede09a7251a2c76988318d02254346979"
     }
   }
 }
